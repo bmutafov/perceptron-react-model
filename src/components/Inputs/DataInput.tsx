@@ -1,4 +1,5 @@
 import {
+  Alert,
   Badge,
   Button,
   Divider,
@@ -6,6 +7,7 @@ import {
   NumberInput,
   SegmentedControl,
   Title,
+  Text,
 } from "@mantine/core";
 import { useInputState } from "@mantine/hooks";
 import React, { useState } from "react";
@@ -39,13 +41,35 @@ const PRESETS: { label: string; data: DataType[] }[] = [
       [[1, 1], 1],
     ],
   },
+  {
+    label: "NAND",
+    data: [
+      [[0, 0], 1],
+      [[0, 1], 1],
+      [[1, 0], 1],
+      [[1, 1], -1],
+    ],
+  },
+  {
+    label: "NOR",
+    data: [
+      [[0, 0], 1],
+      [[0, 1], -1],
+      [[1, 0], -1],
+      [[1, 1], -1],
+    ],
+  },
 ];
 
 const DataInput: React.FC = () => {
   const [epochs, handleEpochsChange] = useInputState(0);
   const [data, setData] = useState<DataType[]>(PRESETS[0].data);
-  const [trainedPerceptron, setTrainedPerceptron] = useState<Perceptron>();
-  const [trainedResults, setTrainedResults] = useState<TrainedResults[]>();
+  const [trainedPerceptron, setTrainedPerceptron] = useState<Perceptron | null>(
+    null
+  );
+  const [trainedResults, setTrainedResults] = useState<TrainedResults[] | null>(
+    null
+  );
   const [isTraining, setIsTraining] = useState<boolean>(false);
 
   const run = () => {
@@ -72,6 +96,12 @@ const DataInput: React.FC = () => {
     }
 
     setTrainedResults(results);
+  };
+
+  const clear = () => {
+    setTrainedPerceptron(null);
+    setTrainedResults(null);
+    handleEpochsChange(0);
   };
 
   const handleDataChange = (i: number, incomingData: DataType): void => {
@@ -113,6 +143,9 @@ const DataInput: React.FC = () => {
           onChange={handleEpochsChange}
           max={100_000}
         />
+        <Button color="gray" onClick={clear}>
+          Clear
+        </Button>
         <Button
           color="green"
           onClick={run}
@@ -122,24 +155,34 @@ const DataInput: React.FC = () => {
           Train
         </Button>
       </Group>
+      {epochs <= 0 && (
+        <Group position="right">
+          <Text color="red" weight="bold">
+            Please enter number of learning cycles (epochs)
+          </Text>
+        </Group>
+      )}
       {trainedPerceptron && (
         <>
-          <Divider my={15} />
+          <Divider my={15} variant="dotted" />
+          <Title order={2} my={5}>
+            Results:
+          </Title>
           <Group position="left" grow>
             <Group direction="column" spacing="xs">
-              <b>Weight I1:</b>
+              Weight 1
               <Badge size="lg" radius="sm">
                 {trainedPerceptron.weights[0]}
               </Badge>
             </Group>
             <Group direction="column" spacing="xs">
-              <b>Weight I2:</b>
+              Weight 2
               <Badge size="lg" radius="sm">
                 {trainedPerceptron.weights[1]}
               </Badge>
             </Group>
             <Group direction="column" spacing="xs">
-              <b>Bias:</b>
+              Bias
               <Badge size="lg" radius="sm" color="red">
                 {trainedPerceptron.bias}
               </Badge>
@@ -149,14 +192,15 @@ const DataInput: React.FC = () => {
               onClick={testTrainedPerceptron}
               disabled={!Boolean(trainedPerceptron)}
             >
-              Test trained perceptron
+              Test with table data
             </Button>
           </Group>
         </>
       )}
       {trainedResults && (
         <>
-          <Divider my={15} />
+          <Divider my={15} variant="dotted" />
+          <Alert>The info shown is using test data from the table above</Alert>
           {trainedResults.map((result) => (
             <Group position="left" my={10} grow>
               <Group spacing="xs">
