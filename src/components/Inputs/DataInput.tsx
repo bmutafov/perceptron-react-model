@@ -167,13 +167,17 @@ const DataInput: React.FC = () => {
               </Group>
               <Group spacing="xs">
                 <b>Predicted:</b>
-                <Badge size="lg" radius="sm" color="red">
+                <Badge size="lg" radius="sm" color="violet">
                   {result.predicted}
                 </Badge>
               </Group>
               <Group spacing="xs">
                 <b>Expected:</b>
-                <Badge size="lg" radius="sm" color="green">
+                <Badge
+                  size="lg"
+                  radius="sm"
+                  color={result.expected === result.predicted ? "green" : "red"}
+                >
                   {result.expected}
                 </Badge>
               </Group>
